@@ -70,6 +70,13 @@ app.post('/urls', (req, res) => {
 });
 
 
+app.post('/urls/:id/delete', (req, res) => {
+  let shortURL = req.params.id;
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
+});
+
+
 app.get('/urls/:id', (req, res) => {
   let templateVars = {shortURL: req.params.id,
                       urlDatabase: urlDatabase};
