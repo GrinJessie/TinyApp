@@ -5,9 +5,9 @@
     <% for (let key in urls) { %>
     <li style="margin: 20px;">
       <%= key %>  ➡ <a href="urls[key]"><%= urls[key] %></a>
-      <form action="/urls/<%= key %>" method="GET" style="display: inline-block">
-        <button style="background: none; border: none; text-decoration: underline;">Edit</button>
-      </form>
+
+        <a href="/urls/<%= key %>"><button style="background: none; border: none; text-decoration: underline;">Edit</button></a>
+
       <form action="/urls/<%= key %>/delete" method="POST" style="display: inline-block">
         <button style="background: none; border: 1px solid grey; border-radius: 100px;">Delete🗑️</button>
       </form>
