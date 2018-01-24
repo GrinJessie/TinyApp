@@ -1,0 +1,13 @@
+<% include partials/_header.ejs%>
+
+<body>
+
+
+<% if (urlDatabase[shortURL]) { %>
+  <h3> <%= shortURL%> - <%=urlDatabase[shortURL]%></h3>
+<% } else { %>
+  <h3>'localhost:8080/urls/<%=shortURL%>' is an invalid url</h3>
+<% } %>
+
+</body>
+</html>
