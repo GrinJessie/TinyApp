@@ -3,10 +3,13 @@
   <h1>A list of short urls that we offer</h1>
   <ul>
     <% for (let key in urls) { %>
-    <li>
-      <a href="/urls/<% key %>"><%= key %></a>  ---> <a href="urls[key]"><%= urls[key] %></a>
-      <form action="/urls/<%= key %>/delete" method="POST">
-        <button>Delete🗑️</button>
+    <li style="margin: 20px;">
+      <%= key %>  ➡ <a href="urls[key]"><%= urls[key] %></a>
+      <form action="/urls/<%= key %>" method="GET" style="display: inline-block">
+        <button style="background: none; border: none; text-decoration: underline;">Edit</button>
+      </form>
+      <form action="/urls/<%= key %>/delete" method="POST" style="display: inline-block">
+        <button style="background: none; border: 1px solid grey; border-radius: 100px;">Delete🗑️</button>
       </form>
     </li>
     <% } %>
