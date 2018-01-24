@@ -3,3 +3,18 @@
 <head>
   <title></title>
 </head>
+<body>
+
+<% if (username) { %>
+  <h3 style="display:inline;">You loged in as: <%=username%>.</h3>
+  <form action="/logout" method="POST" style="display: inline;">
+    <button style="background: none; border: 1px solid grey; border-radius: 100px;">Logout</button>
+  </form>
+<% } else { %>
+  <form action="/login" method="POST">
+    <input type="text" name="username">
+    <button style="background: none; border: 1px solid grey; border-radius: 100px;">Username Login</button>
+  </form>
+<% } %>
+
+

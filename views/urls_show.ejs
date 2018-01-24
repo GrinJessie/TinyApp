@@ -1,8 +1,5 @@
 <% include partials/_header.ejs%>
 
-<body>
-
-
 <% if (urlDatabase[shortURL]) { %>
   <h1 style="margin-top: 70px; margin-left: 30px;"> ShortURL: <%= shortURL%></h1>
   <form action="/urls/<%= shortURL%>" method="POST" style="margin-left: 30px;">
