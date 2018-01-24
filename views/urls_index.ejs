@@ -1,18 +1,19 @@
 <% include partials/_header.ejs%>
 <body>
+  <h1>A list of short urls that we offer</h1>
   <ul>
     <% for (let key in urls) { %>
     <li>
-      <%= key %> - <%= urls[key] %>
+      <a href="/urls/<% key %>"><%= key %></a>  ---> <a href="urls[key]"><%= urls[key] %></a>
       <form action="/urls/<%= key %>/delete" method="POST">
-        <button>Delete</button>
+        <button>Delete🗑️</button>
       </form>
     </li>
     <% } %>
 
   </ul>
 
-<a href="">Click to shorten a url</a>
+<a href="/urls/new">Click to shorten a new url</a>
 
 </body>
 </html>
