@@ -1,13 +1,16 @@
+
 <% include partials/_header.ejs%>
+
+
   <h1>A list of short urls that we offer</h1>
   <ul>
-    <% for (let key in urls) { %>
+    <% for (let shortURL in urlDatabase) { %>
     <li style="margin: 20px;">
-      <%= key %>  ➡ <a href="urls[key]"><%= urls[key] %></a>
+      <%= shortURL %>  ➡ <a href="<%= urlDatabase[shortURL]%>"><%= urlDatabase[shortURL] %></a>
 
-        <a href="/urls/<%= key %>"><button style="background: none; border: none; text-decoration: underline;">Edit</button></a>
+        <a href="/urls/<%= shortURL %>"><button style="background: none; border: none; text-decoration: underline;">Edit</button></a>
 
-      <form action="/urls/<%= key %>/delete" method="POST" style="display: inline-block">
+      <form action="/urls/<%= shortURL %>/delete" method="POST" style="display: inline-block">
         <button style="background: none; border: 1px solid grey; border-radius: 100px;">Delete🗑️</button>
       </form>
     </li>
