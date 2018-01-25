@@ -18,7 +18,7 @@ const urlDatabase = {
 
 
 const generateRandomString = function(){
-  const alphNumList = [0,1,2,3,4,5,6,7,8,9,0,'z','x','c','v','b','n','m','a','s','d','f','g','h','j','k','l','q','w','e','r','t','y','u','i','o','Z','X','C','V','B','N','M','A','S','D','F','G','H','J','K','L','Q','W','E','R','T','Y','U','I','O','P'];
+  const alphNumList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'];
   let alphNumString = '';
   for (let i = 1; i <= 6; i++){
     let randomNum = Math.ceil(Math.random() * 62);
@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
 
 
 app.get('/hello', (req, res) => {
-  res.end('<html><body>Hello <b>World</b></body></html>\n')
+  res.end('<html><body>Hello <b>World</b></body></html>\n');
 });
 
 
@@ -52,7 +52,7 @@ app.post('/logout', (req, res) => {
 
 app.get('/urls', (req, res) => {
   let templateVars = {urls: urlDatabase,
-                      username: req.cookies.username};
+    username: req.cookies.username};
   res.render('urls_index.ejs', templateVars);
 });
 
@@ -77,11 +77,11 @@ app.post('/urls', (req, res) => {
       shortURLExisting = true;
       shortURL = key;
     }
-  };
+  }
   if (!shortURLExisting) {
     shortURL = generateRandomString();
     urlDatabase[shortURL] = longURL;
-  };
+  }
   let updatedURL = '/urls/' + shortURL;
   res.redirect(updatedURL);
 });
@@ -96,8 +96,8 @@ app.post('/urls/:id/delete', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   let templateVars = {shortURL: req.params.id,
-                      urlDatabase: urlDatabase,
-                      username: req.cookies.username};
+    urlDatabase: urlDatabase,
+    username: req.cookies.username};
   res.render('urls_show.ejs', templateVars);
 });
 
