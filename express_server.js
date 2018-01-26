@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = process.env.PORT || 8080;
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt-nodejs');
 
 app.use(cookieParser());
 
@@ -28,6 +29,7 @@ const users = {
     password: "dishwasher-funk"
   }
 };
+
 
 //to generate random user_id and shortURL
 const generateRandomString = function(){
@@ -92,7 +94,7 @@ const validRegistration = function(req){
 //if matched, key = user's user_id
 const loginMatch = function (users, req){
   for (let key in users) {
-    if (req.body.email === users[key].email && req.body.password === users[key].password) {
+    if (req.body.email === users[key].email && bcrypt.compareSync(req.body.password, users[key].password)) {
       return key;
     }
   }
@@ -142,7 +144,8 @@ app.post('/register', (req, res) => {
     users[userId] = {};
     users[userId].id = userId;
     users[userId].email = req.body.email;
-    users[userId].password = req.body.password;
+    password = req.body.password;
+    users[userId].password = bcrypt.hashSync(password);
     res.cookie('user_id', userId);
     res.redirect('/urls');
   }
