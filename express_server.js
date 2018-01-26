@@ -40,14 +40,11 @@ const generateRandomString = function(){
   return alphNumString;
 };
 
-//global varieble
 //to check the the presence of cookie/login
-//let loginStatus = false;
 const checkLogin = function(id){
   return !!id;
 };
 
-//global varieble
 //to generate customized database for each login user
 const urlsForUsers = function(id) {
   let userOwned = {};
@@ -58,7 +55,6 @@ const urlsForUsers = function(id) {
   }
   return userOwned;
 };
-
 
 //check the updated longURL exist or not
 //check the new added longURL exist or not
@@ -73,7 +69,6 @@ const urlDuplicats = function (newLongURL) {
 };
 
 //check email has been registered
-// let registerHistoryStatus = false;
 const registerHistory = function(users, email){
   for (let obj in users) {
     if (email === users[obj].email){
@@ -83,7 +78,6 @@ const registerHistory = function(users, email){
 };
 
 //check if registration info are not empty
-// let validRegistrationStatus = true;
 const validRegistration = function(req){
   //empty fields
   if(!req.body.email || !req.body.password) {
@@ -142,7 +136,7 @@ app.post('/register', (req, res) => {
   }else if (registerHistory(users, req.body.email)) {
     res.status(400);
     res.render('registration', {validRegistrationStatus: true, registerHistoryStatus: true});
-  //new registration
+  //set up new registration
   } else {
     let userId = generateRandomString();
     users[userId] = {};
@@ -157,7 +151,6 @@ app.post('/register', (req, res) => {
 
 app.get('/login', (req, res) => {
   const loginStatus = checkLogin(req.cookies.user_id);
-
   if(!loginStatus){
     let templateVars = {
       loginStatus: loginStatus
@@ -205,13 +198,11 @@ app.get('/urls', (req, res) => {
       loginStatus: loginStatus};
     res.render('urls_index', templateVars);
   } else {
-    let sysOwned = urlsForUsers('system');
-    let templateVars = {urlDatabase: sysOwned,
-      user: 'system',
+    //empty urlDatabase to avoid ejo error
+    let templateVars = {urlDatabase: {},
       loginStatus: loginStatus};
     res.render('urls_index', templateVars);
   }
-
 });
 
 
@@ -229,6 +220,7 @@ app.get('/urls/new', (req, res) => {
 
 app.post('/urls', (req, res) => {
   const loginStatus = checkLogin(req.cookies.user_id);
+  //check log in and duplicates
   if(loginStatus){
     let newLongURL = req.body.longURL;
     let duplicateStatus = urlDuplicats(newLongURL);
@@ -251,12 +243,14 @@ app.post('/urls', (req, res) => {
 
 app.post('/urls/:id/delete', (req, res) => {
   const loginStatus = checkLogin(req.cookies.user_id);
+  //check login and if the user is the creator
   if(loginStatus){
     let shortURL = req.params.id;
     if(req.cookies.user_id === urlDatabase[shortURL].userID) {
       delete urlDatabase[shortURL];
       res.redirect('/urls');
     } else{
+      //logged in but not the creator
       let userOwned = urlsForUsers(req.cookies.user_id);
       let templateVars = {loginStatus: loginStatus,
         shortURL: req.params.id,
@@ -264,6 +258,7 @@ app.post('/urls/:id/delete', (req, res) => {
       res.render(`/urls/ ${req.params.id}`, templateVars);
     }
   } else {
+    //not log in
     let templateVars = {loginStatus: loginStatus};
     res.render('urls_show', templateVars);
   }
@@ -289,6 +284,7 @@ app.get('/urls/:id', (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const loginStatus = checkLogin(req.cookies.user_id);
   if(loginStatus){
+    //check login and if the user is the creator
     let newLongURL = req.body.newLongUrl;
     let shortURL = req.params.id;
     //log in, as well as the creator
