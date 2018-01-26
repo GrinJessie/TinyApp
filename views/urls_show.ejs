@@ -1,6 +1,9 @@
 <% include partials/_header.ejs%>
 
-<% if (urlDatabase[shortURL].longURL) { %>
+<% if (!loginStatus) { %>
+  <h3>ERROR: Please log in to view and edit this url shortner.</h3>
+<% } else {%>
+<% if (urlDatabase[shortURL]) { %>
 
   <h1 style="margin-top: 70px; margin-left: 30px;"> ShortURL: <%= shortURL%></h1>
 
@@ -11,7 +14,10 @@
     <button style="background: none; border: 1px solid grey; border-radius: 100px;">Updated the long URL</button>
 
   </form>
+<% } else {%>
+  <h3><%= shortURL %> is not accessible/editable for you (only to its creator...) <br>OR it hasn't been created yet (Start now!)</h3>
 <% } %>
 
+<% } %>
 </body>
 </html>

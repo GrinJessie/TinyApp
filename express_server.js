@@ -12,16 +12,11 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
-  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: 'system'},
-  "9sm5xK": {longURL: "http://www.google.com", userID: 'system'},
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: 'userRandomID'},
+  "9sm5xK": {longURL: "http://www.google.com", userID: 'user2RandomID'},
 };
 
 const users = {
-  "system": {
-    id: 'system',
-    email: "imsys@.sys.com",
-    password: 'adminnimda'
-  },
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
@@ -34,28 +29,26 @@ const users = {
   }
 };
 
+//to generate random user_id and shortURL
 const generateRandomString = function(){
   const alphNumList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'];
   let alphNumString = '';
   for (let i = 1; i <= 6; i++){
-    let randomNum = Math.ceil(Math.random() * 62);
+    let randomNum = Math.floor(Math.random() * 62);
     alphNumString += alphNumList[randomNum];
   }
   return alphNumString;
 };
 
-let loginStatus;
-const remindLogin = function(id, res){
-  if (!id) {
-    loginStatus = false;
-  } else {
-    loginStatus = true;
-  }
-}
+//global varieble
+//to check the the presence of cookie/login
+//let loginStatus = false;
+const checkLogin = function(id){
+  return !!id;
+};
 
-//if (loginStatus), then run urlsForUsers to return {}, save it
-//else, run urlsForUsers('system';)
-//id = req.cookies.user_id
+//global varieble
+//to generate customized database for each login user
 const urlsForUsers = function(id) {
   let userOwned = {};
     for (let key in urlDatabase) {
@@ -67,8 +60,58 @@ const urlsForUsers = function(id) {
 };
 
 
+//check the updated longURL exist or not
+//check the new added longURL exist or not
+const urlDuplicats = function (newLongURL) {
+  let duplicateStatus = false;
+  for (let key in urlDatabase) {
+    if (urlDatabase[key].longURL === newLongURL){
+      duplicateStatus = key;
+    }
+  }
+  return duplicateStatus;
+};
+
+//check email has been registered
+// let registerHistoryStatus = false;
+const registerHistory = function(users, email){
+  for (let obj in users) {
+    if (email === users[obj].email){
+      return true;
+    }
+  }
+};
+
+//check if registration info are not empty
+// let validRegistrationStatus = true;
+const validRegistration = function(req){
+  //empty fields
+  if(!req.body.email || !req.body.password) {
+    return false;
+  } else {
+    return true;
+  }
+};
+
+//check if the login info matches the user database
+//if not matched, key = undefined
+//if matched, key = user's user_id
+const loginMatch = function (users, req){
+  for (let key in users) {
+    if (req.body.email === users[key].email && req.body.password === users[key].password) {
+      return key;
+    }
+  }
+};
+
+
 app.get('/', (req, res) => {
-  res.end('Hello!');
+  const loginStatus = checkLogin(req.cookies.user_id);
+  if(loginStatus){
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 
@@ -78,25 +121,27 @@ app.get('/hello', (req, res) => {
 
 
 app.get('/register', (req, res) => {
-  res.render('registration');
+  const loginStatus = checkLogin(req.cookies.user_id);
+  if(!loginStatus){
+    let templateVars = {
+      registerHistoryStatus: registerHistory(users, req.body.email),
+      validRegistrationStatus:validRegistration(req)};
+    res.render('registration', templateVars);
+  } else {
+    res.redirect('/urls');
+  }
 });
 
 
 app.post('/register', (req, res) => {
-  let registerHistory = false;
-  for (let obj in users) {
-    if (req.body.email === obj.email){
-      registerHistory = true;
-    }
-  }
   //data validation
-  if(!req.body.email || !req.body.password) {
+  if(!validRegistration(req)) {
     res.status(400);
-    res.send('Please fill up email and password.');
+    res.render('registration', {validRegistrationStatus: false});
   //registration history
-  } else if (registerHistory) {
-        res.status(400);
-        res.send('Your email has been registered.');
+  }else if (registerHistory(users, req.body.email)) {
+      res.status(400);
+      res.render('registration',{validRegistrationStatus: true, registerHistoryStatus: true});
   //new registration
   } else {
     let userId = generateRandomString();
@@ -111,28 +156,30 @@ app.post('/register', (req, res) => {
 
 
 app.get('/login', (req, res) => {
-  remindLogin();
+  const loginStatus = checkLogin(req.cookies.user_id);
+
   if(!loginStatus){
-    let templateVars = {user: "system",
-      loginStatus: loginStatus};
+    let templateVars = {
+      loginStatus: loginStatus
+    };
     res.render('login', templateVars);
+  } else {
+    res.redirect('/urls');
   }
 });
 
 
+
 app.post('/login', (req, res) => {
-  let loginStatus = false;
-  for (let key in users) {
-    if (req.body.email === users[key].email && req.body.password === users[key].password) {
-      loginStatus = true;
-      res.cookie('user_id', users[key].id);
-      res.redirect('/');
-      break;
-    }
-  }
-  if (!loginStatus) {
+  //if not matched, key = undefined
+  //if matched, key = user's user_id
+  let key = loginMatch(users, req);
+  if (!key) {
       res.status(403);
-      res.send('Wrong user email or password. Please try again.')
+      res.render('login', { loginStatus: false });
+  } else {
+    res.cookie('user_id', users[key].id);
+    res.redirect('/urls');
   }
 });
 
@@ -150,7 +197,7 @@ app.get('/urls.json', (req, res) =>{
 
 
 app.get('/urls', (req, res) => {
-  remindLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.cookies.user_id);
   if(loginStatus){
     let userOwned = urlsForUsers(req.cookies.user_id);
     let templateVars = {urlDatabase: userOwned,
@@ -169,7 +216,7 @@ app.get('/urls', (req, res) => {
 
 
 app.get('/urls/new', (req, res) => {
-  remindLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.cookies.user_id);
   if(loginStatus){
     let templateVars = {user: users[req.cookies.user_id],
       loginStatus: loginStatus};
@@ -179,18 +226,9 @@ app.get('/urls/new', (req, res) => {
   }
 });
 
-function urlDuplicats (newLongURL) {
-  let duplicateStatus = false;
-  for (let key in urlDatabase) {
-    if (urlDatabase[key].longURL === newLongURL){
-      duplicateStatus = key;
-    }
-  }
-  return duplicateStatus;
-}
 
 app.post('/urls', (req, res) => {
-  remindLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.cookies.user_id);
   if(loginStatus){
     let newLongURL = req.body.longURL;
     let duplicateStatus = urlDuplicats(newLongURL);
@@ -205,24 +243,35 @@ app.post('/urls', (req, res) => {
     }
     let updatedURL = '/urls/' + shortURL;
     res.redirect(updatedURL);
+  } else {
+    res.redirect('/urls/new');
   }
 });
 
 
 app.post('/urls/:id/delete', (req, res) => {
-  remindLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.cookies.user_id);
   if(loginStatus){
     let shortURL = req.params.id;
-    delete urlDatabase[shortURL];
-    res.redirect('/urls');
+    if(req.cookies.user_id === urlDatabase[shortURL].userID) {
+      delete urlDatabase[shortURL];
+      res.redirect('/urls');
+    } else{
+      let userOwned = urlsForUsers(req.cookies.user_id);
+      let templateVars = {loginStatus: loginStatus,
+        shortURL:  req.params.id,
+        urlDatabase: userOwned};
+      res.render(`/urls/ ${req.params.id}`, templateVars);
+    }
   } else {
-    res.redirect('/login');
+    let templateVars = {loginStatus: loginStatus};
+    res.render('urls_show', templateVars);
   }
 });
 
 
 app.get('/urls/:id', (req, res) => {
-  remindLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.cookies.user_id);
   if(loginStatus){
     let userOwned = urlsForUsers(req.cookies.user_id);
     let templateVars = {shortURL: req.params.id,
@@ -231,34 +280,51 @@ app.get('/urls/:id', (req, res) => {
       loginStatus: loginStatus};
   res.render('urls_show', templateVars);
   } else {
-    res.redirect('/login');
+    let templateVars = {loginStatus: loginStatus};
+    res.render('urls_show', templateVars);
   }
 });
 
 
 app.post('/urls/:id', (req, res) => {
-  remindLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.cookies.user_id);
   if(loginStatus){
     let newLongURL = req.body.newLongUrl;
     let shortURL = req.params.id;
-    let duplicateStatus = urlDuplicats(newLongURL);
-
-    if (!duplicateStatus){
-      urlDatabase[shortURL].longURL = newLongURL;
-      res.redirect(`/urls/${shortURL}`);
-    } else {
-      res.send('Updated long url exists.');
+    //log in, as well as the creator
+    if(req.cookies.user_id === urlDatabase[shortURL].userID) {
+      let duplicateStatus = urlDuplicats(newLongURL);
+      //check if the new url existing already
+      if (!duplicateStatus){
+        urlDatabase[shortURL].longURL = newLongURL;
+        res.redirect(`/urls/${shortURL}`);
+      } else {
+        res.send('Updated long url exists.');
+      }
+      //log in, but not the creator
+    } else{
+      let userOwned = urlsForUsers(req.cookies.user_id);
+      let templateVars = {loginStatus: loginStatus,
+        shortURL:  req.params.id,
+        urlDatabase: userOwned};
+      res.render(`/urls/ ${req.params.id}`, templateVars);
     }
+    // not log in
+  } else {
+    let templateVars = {loginStatus: loginStatus}
+    res.render(`/urls/ ${req.params.id}`, templateVars);
   }
 });
 
 
 app.get('/u/:shortURL', (req, res) => {
   let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[shortURL];
-  //redirect to :id
-  let idSearch = '/urls/' + shortURL;
-  res.redirect(longURL || idSearch);
+  let longURL = urlDatabase[shortURL].longURL;
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.redirect(`/urls/${shortURL}`);
+  }
 });
 
 
