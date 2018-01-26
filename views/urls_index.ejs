@@ -6,7 +6,9 @@
   <ul>
     <% for (let shortURL in urlDatabase) { %>
     <li style="margin: 20px;">
-      <%= shortURL %>  ➡ <a href="<%= urlDatabase[shortURL]%>"><%= urlDatabase[shortURL] %></a>
+
+
+      <%= shortURL %>  ➡ <a href="<%= urlDatabase[shortURL].longURL%>"><%= urlDatabase[shortURL].longURL %></a>
 
         <a href="/urls/<%= shortURL %>"><button style="background: none; border: none; text-decoration: underline;">Edit</button></a>
 

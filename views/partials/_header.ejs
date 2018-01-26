@@ -5,7 +5,12 @@
 </head>
 <body>
 
-<% if (!user){ %>
+<script type="text/javascript">
+  alert('Please log in to continue.');
+</script>
+
+
+<% if ( user === "system" || !user){ %>
   <a href="/login"><button style="background: none; border: 1px solid grey; border-radius: 100px;">Log in</button></a>
   <a href="/register"><button style="background: none; border: 1px solid grey; border-radius: 100px;">Register</button></a>
 <% } else {%>

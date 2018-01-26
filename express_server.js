@@ -12,20 +12,26 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: 'system'},
+  "9sm5xK": {longURL: "http://www.google.com", userID: 'system'},
+  "l6yJ0k": {longURL: "http://www.baidu.com", userID: 'l6yJ0k'}
 };
 
 const users = {
+  "system": {
+    id: 'system',
+    email: "imsys@.sys.com",
+    password: 'adminnimda'
+  },
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "purple-monkey-dinosaur",
   },
  "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "dishwasher-funk",
   }
 };
 
@@ -39,6 +45,28 @@ const generateRandomString = function(){
   return alphNumString;
 };
 
+let loginStatus;
+const remindLogin = function(id, res){
+  if (!id) {
+    loginStatus = false;
+  } else {
+    loginStatus = true;
+  }
+}
+
+//if (loginStatus), then run urlsForUsers to return {}, save it
+//else, run urlsForUsers('system';)
+//id = req.cookies.user_id
+const urlsForUsers = function(id) {
+  let userOwned = {};
+    for (let key in urlDatabase) {
+      if (urlDatabase[key].userID === id) {
+        userOwned[key] = urlDatabase[key];
+      }
+    }
+   return userOwned;
+};
+
 
 app.get('/', (req, res) => {
   res.end('Hello!');
@@ -47,14 +75,6 @@ app.get('/', (req, res) => {
 
 app.get('/hello', (req, res) => {
   res.end('<html><body>Hello <b>World</b></body></html>\n');
-});
-
-
-app.get('/urls', (req, res) => {
-  let templateVars = {urlDatabase: urlDatabase,
-    user: users[req.cookies.user_id]};
-  console.log(users);
-  res.render('urls_index', templateVars);
 });
 
 
@@ -91,6 +111,12 @@ app.post('/register', (req, res) => {
 });
 
 
+app.get('/login', (req, res) => {
+  let templateVars = {user: users[req.cookies.user_id]};
+  res.render('login', templateVars);
+});
+
+
 app.post('/login', (req, res) => {
   let loginStatus = false;
   for (let key in users) {
@@ -108,13 +134,6 @@ app.post('/login', (req, res) => {
 });
 
 
-
-app.get('/login', (req, res) => {
-  let templateVars = {user: users[req.cookies.user_id]};
-  res.render('login', templateVars);
-});
-
-
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/urls');
@@ -124,6 +143,24 @@ app.post('/logout', (req, res) => {
 app.get('/urls.json', (req, res) =>{
   //send a json response
   res.json(urlDatabase);
+});
+
+
+app.get('/urls', (req, res) => {
+  remindLogin(req.cookies.user_id);
+  if(loginStatus){
+    let userOwned = urlsForUsers(req.cookies.user_id);
+    let templateVars = {urlDatabase: userOwned,
+      user: users[req.cookies.user_id]};
+    res.render('urls_index', templateVars);
+  } else {
+    let sysOwned = urlsForUsers('system');
+    let templateVars = {urlDatabase: sysOwned,
+      user: 'system'};
+      console.log(templateVars);
+    res.render('urls_index', templateVars);
+  }
+
 });
 
 
