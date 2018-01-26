@@ -13,19 +13,19 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
   "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: 'userRandomID'},
-  "9sm5xK": {longURL: "http://www.google.com", userID: 'user2RandomID'},
+  "9sm5xK": {longURL: "http://www.google.com", userID: 'user2RandomID'}
 };
 
 const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
+  "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: "dishwasher-funk"
   }
 };
 
@@ -51,12 +51,12 @@ const checkLogin = function(id){
 //to generate customized database for each login user
 const urlsForUsers = function(id) {
   let userOwned = {};
-    for (let key in urlDatabase) {
-      if (urlDatabase[key].userID === id) {
-        userOwned[key] = urlDatabase[key];
-      }
+  for (let key in urlDatabase) {
+    if (urlDatabase[key].userID === id) {
+      userOwned[key] = urlDatabase[key];
     }
-   return userOwned;
+  }
+  return userOwned;
 };
 
 
@@ -125,7 +125,7 @@ app.get('/register', (req, res) => {
   if(!loginStatus){
     let templateVars = {
       registerHistoryStatus: registerHistory(users, req.body.email),
-      validRegistrationStatus:validRegistration(req)};
+      validRegistrationStatus: validRegistration(req)};
     res.render('registration', templateVars);
   } else {
     res.redirect('/urls');
@@ -140,8 +140,8 @@ app.post('/register', (req, res) => {
     res.render('registration', {validRegistrationStatus: false});
   //registration history
   }else if (registerHistory(users, req.body.email)) {
-      res.status(400);
-      res.render('registration',{validRegistrationStatus: true, registerHistoryStatus: true});
+    res.status(400);
+    res.render('registration', {validRegistrationStatus: true, registerHistoryStatus: true});
   //new registration
   } else {
     let userId = generateRandomString();
@@ -175,8 +175,8 @@ app.post('/login', (req, res) => {
   //if matched, key = user's user_id
   let key = loginMatch(users, req);
   if (!key) {
-      res.status(403);
-      res.render('login', { loginStatus: false });
+    res.status(403);
+    res.render('login', { loginStatus: false });
   } else {
     res.cookie('user_id', users[key].id);
     res.redirect('/urls');
@@ -259,7 +259,7 @@ app.post('/urls/:id/delete', (req, res) => {
     } else{
       let userOwned = urlsForUsers(req.cookies.user_id);
       let templateVars = {loginStatus: loginStatus,
-        shortURL:  req.params.id,
+        shortURL: req.params.id,
         urlDatabase: userOwned};
       res.render(`/urls/ ${req.params.id}`, templateVars);
     }
@@ -278,7 +278,7 @@ app.get('/urls/:id', (req, res) => {
       urlDatabase: userOwned,
       user: users[req.cookies.user_id],
       loginStatus: loginStatus};
-  res.render('urls_show', templateVars);
+    res.render('urls_show', templateVars);
   } else {
     let templateVars = {loginStatus: loginStatus};
     res.render('urls_show', templateVars);
@@ -305,13 +305,13 @@ app.post('/urls/:id', (req, res) => {
     } else{
       let userOwned = urlsForUsers(req.cookies.user_id);
       let templateVars = {loginStatus: loginStatus,
-        shortURL:  req.params.id,
+        shortURL: req.params.id,
         urlDatabase: userOwned};
       res.render(`/urls/ ${req.params.id}`, templateVars);
     }
     // not log in
   } else {
-    let templateVars = {loginStatus: loginStatus}
+    let templateVars = {loginStatus: loginStatus};
     res.render(`/urls/ ${req.params.id}`, templateVars);
   }
 });
