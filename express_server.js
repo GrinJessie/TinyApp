@@ -14,7 +14,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 const urlDatabase = {
   "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: 'system'},
   "9sm5xK": {longURL: "http://www.google.com", userID: 'system'},
-  "l6yJ0k": {longURL: "http://www.baidu.com", userID: 'l6yJ0k'}
 };
 
 const users = {
@@ -112,8 +111,12 @@ app.post('/register', (req, res) => {
 
 
 app.get('/login', (req, res) => {
-  let templateVars = {user: users[req.cookies.user_id]};
-  res.render('login', templateVars);
+  remindLogin();
+  if(!loginStatus){
+    let templateVars = {user: "system",
+      loginStatus: loginStatus};
+    res.render('login', templateVars);
+  }
 });
 
 
@@ -151,13 +154,14 @@ app.get('/urls', (req, res) => {
   if(loginStatus){
     let userOwned = urlsForUsers(req.cookies.user_id);
     let templateVars = {urlDatabase: userOwned,
-      user: users[req.cookies.user_id]};
+      user: users[req.cookies.user_id],
+      loginStatus: loginStatus};
     res.render('urls_index', templateVars);
   } else {
     let sysOwned = urlsForUsers('system');
     let templateVars = {urlDatabase: sysOwned,
-      user: 'system'};
-      console.log(templateVars);
+      user: 'system',
+      loginStatus: loginStatus};
     res.render('urls_index', templateVars);
   }
 
@@ -165,49 +169,87 @@ app.get('/urls', (req, res) => {
 
 
 app.get('/urls/new', (req, res) => {
-  let templateVars = {user: users[req.cookies.user_id]};
-  res.render('urls_new', templateVars);
+  remindLogin(req.cookies.user_id);
+  if(loginStatus){
+    let templateVars = {user: users[req.cookies.user_id],
+      loginStatus: loginStatus};
+    res.render('urls_new', templateVars);
+  } else {
+    res.redirect('/login');
+  }
 });
 
-
-app.post('/urls', (req, res) => {
-  let longURL = req.body.longURL;
-  let shortURLExisting = false;
+function urlDuplicats (newLongURL) {
+  let duplicateStatus = false;
   for (let key in urlDatabase) {
-    if (urlDatabase[key] === longURL){
-      shortURLExisting = true;
-      shortURL = key;
+    if (urlDatabase[key].longURL === newLongURL){
+      duplicateStatus = key;
     }
   }
-  if (!shortURLExisting) {
-    shortURL = generateRandomString();
-    urlDatabase[shortURL] = longURL;
+  return duplicateStatus;
+}
+
+app.post('/urls', (req, res) => {
+  remindLogin(req.cookies.user_id);
+  if(loginStatus){
+    let newLongURL = req.body.longURL;
+    let duplicateStatus = urlDuplicats(newLongURL);
+    let shortURL;
+    if (!duplicateStatus) {
+      shortURL = generateRandomString();
+      urlDatabase[shortURL] = {};
+      urlDatabase[shortURL].longURL = newLongURL;
+      urlDatabase[shortURL].userID = req.cookies.user_id;
+    } else {
+      shortURL = duplicateStatus;
+    }
+    let updatedURL = '/urls/' + shortURL;
+    res.redirect(updatedURL);
   }
-  let updatedURL = '/urls/' + shortURL;
-  res.redirect(updatedURL);
 });
 
 
 app.post('/urls/:id/delete', (req, res) => {
-  let shortURL = req.params.id;
-  delete urlDatabase[shortURL];
-  res.redirect('/urls');
+  remindLogin(req.cookies.user_id);
+  if(loginStatus){
+    let shortURL = req.params.id;
+    delete urlDatabase[shortURL];
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 
 app.get('/urls/:id', (req, res) => {
-  let templateVars = {shortURL: req.params.id,
-    urlDatabase: urlDatabase,
-    user: users[req.cookies.user_id]};
+  remindLogin(req.cookies.user_id);
+  if(loginStatus){
+    let userOwned = urlsForUsers(req.cookies.user_id);
+    let templateVars = {shortURL: req.params.id,
+      urlDatabase: userOwned,
+      user: users[req.cookies.user_id],
+      loginStatus: loginStatus};
   res.render('urls_show', templateVars);
+  } else {
+    res.redirect('/login');
+  }
 });
 
 
 app.post('/urls/:id', (req, res) => {
-  let longURL = req.body.newLongUrl;
-  let shortURL = req.params.id;
-  urlDatabase[shortURL] = longURL;
-  res.redirect(`/urls/${shortURL}`);
+  remindLogin(req.cookies.user_id);
+  if(loginStatus){
+    let newLongURL = req.body.newLongUrl;
+    let shortURL = req.params.id;
+    let duplicateStatus = urlDuplicats(newLongURL);
+
+    if (!duplicateStatus){
+      urlDatabase[shortURL].longURL = newLongURL;
+      res.redirect(`/urls/${shortURL}`);
+    } else {
+      res.send('Updated long url exists.');
+    }
+  }
 });
 
 

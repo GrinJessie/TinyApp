@@ -1,13 +1,16 @@
 <% include partials/_header.ejs%>
 
-<% if (urlDatabase[shortURL]) { %>
+<% if (urlDatabase[shortURL].longURL) { %>
+
   <h1 style="margin-top: 70px; margin-left: 30px;"> ShortURL: <%= shortURL%></h1>
+
   <form action="/urls/<%= shortURL%>" method="POST" style="margin-left: 30px;">
-    <input type="text" name="newLongUrl" placeholder="<%=urlDatabase[shortURL]%>" style="width: 50%; background: none; border: 1px solid grey; border-radius: 100px; padding-left: 10px;">
+
+    <input type="text" name="newLongUrl" placeholder="<%=urlDatabase[shortURL].longURL%>" style="width: 50%; background: none; border: 1px solid grey; border-radius: 100px; padding-left: 10px;">
+
     <button style="background: none; border: 1px solid grey; border-radius: 100px;">Updated the long URL</button>
+
   </form>
-<% } else { %>
-  <h3>'localhost:8080/urls/<%=shortURL%>' is an invalid url</h3>
 <% } %>
 
 </body>

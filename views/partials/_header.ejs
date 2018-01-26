@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head>
-  <title></title>
+  <title>Tiny App</title>
 </head>
 <body>
 
 <script type="text/javascript">
-  alert('Please log in to continue.');
+  <% if (!loginStatus) { %>
+  alert('Please log in to continue.')
+  <% } %>
 </script>
 
 
-<% if ( user === "system" || !user){ %>
+<% if (!loginStatus){ %>
+
   <a href="/login"><button style="background: none; border: 1px solid grey; border-radius: 100px;">Log in</button></a>
   <a href="/register"><button style="background: none; border: 1px solid grey; border-radius: 100px;">Register</button></a>
+
 <% } else {%>
-  <p style="display: inline;">You logged in as<%= user.email %></p>
+  <p style="display: inline;">You logged in as: <%= user.email %></p>
   <form action="/logout" method="POST" style="display: inline;">
     <button type="submit" style="background: none; border: 1px solid grey; border-radius: 100px;">Log out</button>
   </form>

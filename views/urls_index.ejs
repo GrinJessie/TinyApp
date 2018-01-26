@@ -2,7 +2,15 @@
 <% include partials/_header.ejs%>
 
 
-  <h1>A list of short urls that we offer</h1>
+  <h1>A list of short urls that we offer  </h1>
+    <% if (!loginStatus) { %>
+      <h3>which created by system for the public</h3>
+  <% } %>
+
+    <% if (Object.keys(urlDatabase).length === 0) { %>
+      <h3>You haven't create any url shortners. Start now!</h3>
+    <% } %>
+
   <ul>
     <% for (let shortURL in urlDatabase) { %>
     <li style="margin: 20px;">
