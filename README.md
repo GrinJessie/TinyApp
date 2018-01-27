@@ -10,14 +10,10 @@ Here to help you **easily and quickly**
 * strojg security and protect your passwords
 
 ## Final Project
-![examples](https://gist.githubusercontent.com/GrinJessie/eb53c8c4fd99a406c92b756edc884eb5/raw/f575eb2806ba953e1db5d03be7e3572d31c71683/Demo1.PNG)
-![examples](https://gist.githubusercontent.com/GrinJessie/eb53c8c4fd99a406c92b756edc884eb5/raw/f575eb2806ba953e1db5d03be7e3572d31c71683/Demo2.PNG)
-![examples](https://gist.githubusercontent.com/GrinJessie/eb53c8c4fd99a406c92b756edc884eb5/raw/f575eb2806ba953e1db5d03be7e3572d31c71683/Demo3.PNG)
-![examples](https://gist.githubusercontent.com/GrinJessie/eb53c8c4fd99a406c92b756edc884eb5/raw/f575eb2806ba953e1db5d03be7e3572d31c71683/Demo4.PNG)
-![examples](https://gist.githubusercontent.com/GrinJessie/eb53c8c4fd99a406c92b756edc884eb5/raw/f575eb2806ba953e1db5d03be7e3572d31c71683/Demo5.PNG)
-![examples](https://gist.githubusercontent.com/GrinJessie/eb53c8c4fd99a406c92b756edc884eb5/raw/f575eb2806ba953e1db5d03be7e3572d31c71683/Demo6.PNG)
-![examples](https://gist.githubusercontent.com/GrinJessie/eb53c8c4fd99a406c92b756edc884eb5/raw/f575eb2806ba953e1db5d03be7e3572d31c71683/Demo7.PNG)
-![examples](https://gist.githubusercontent.com/GrinJessie/eb53c8c4fd99a406c92b756edc884eb5/raw/f575eb2806ba953e1db5d03be7e3572d31c71683/Demo8.PNG)
+![example1](https://github.com/GrinJessie/TinyApp/blob/master/docs/example1.PNG)
+![/urls/new](https://github.com/GrinJessie/TinyApp/blob/master/docs/example2.PNG)
+![/urls](https://github.com/GrinJessie/TinyApp/blob/master/docs/example3.PNG)
+
 
 ## Dependencies
    * "bcrypt-nodejs": "0.0.3",
