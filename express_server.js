@@ -1,12 +1,15 @@
 const express = require('express');
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt-nodejs');
 
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['mySecretKey']
+}));
 
 app.set('view engine', 'ejs');
 
@@ -21,12 +24,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync('purple-monkey-dinosaur')
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync('dishwasher-funk')
   }
 };
 
@@ -93,7 +96,11 @@ const validRegistration = function(req){
 //if not matched, key = undefined
 //if matched, key = user's user_id
 const loginMatch = function (users, req){
+  console.log(req.body);
+
   for (let key in users) {
+      console.log(bcrypt.compareSync(req.body.password, users[key].password));
+
     if (req.body.email === users[key].email && bcrypt.compareSync(req.body.password, users[key].password)) {
       return key;
     }
@@ -102,7 +109,7 @@ const loginMatch = function (users, req){
 
 
 app.get('/', (req, res) => {
-  const loginStatus = checkLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.session.user_id);
   if(loginStatus){
     res.redirect('/urls');
   } else {
@@ -117,7 +124,7 @@ app.get('/hello', (req, res) => {
 
 
 app.get('/register', (req, res) => {
-  const loginStatus = checkLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.session.user_id);
   if(!loginStatus){
     let templateVars = {
       registerHistoryStatus: registerHistory(users, req.body.email),
@@ -146,14 +153,14 @@ app.post('/register', (req, res) => {
     users[userId].email = req.body.email;
     password = req.body.password;
     users[userId].password = bcrypt.hashSync(password);
-    res.cookie('user_id', userId);
+    req.session.user_id = userId;
     res.redirect('/urls');
   }
 });
 
 
 app.get('/login', (req, res) => {
-  const loginStatus = checkLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.session.user_id);
   if(!loginStatus){
     let templateVars = {
       loginStatus: loginStatus
@@ -167,6 +174,9 @@ app.get('/login', (req, res) => {
 
 
 app.post('/login', (req, res) => {
+  console.log('/login');
+    console.log(req.body);
+
   //if not matched, key = undefined
   //if matched, key = user's user_id
   let key = loginMatch(users, req);
@@ -174,14 +184,14 @@ app.post('/login', (req, res) => {
     res.status(403);
     res.render('login', { loginStatus: false });
   } else {
-    res.cookie('user_id', users[key].id);
+    req.session.user_id = users[key].id;
     res.redirect('/urls');
   }
 });
 
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/urls');
 });
 
@@ -193,11 +203,11 @@ app.get('/urls.json', (req, res) =>{
 
 
 app.get('/urls', (req, res) => {
-  const loginStatus = checkLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.session.user_id);
   if(loginStatus){
-    let userOwned = urlsForUsers(req.cookies.user_id);
+    let userOwned = urlsForUsers(req.session.user_id);
     let templateVars = {urlDatabase: userOwned,
-      user: users[req.cookies.user_id],
+      user: users[req.session.user_id],
       loginStatus: loginStatus};
     res.render('urls_index', templateVars);
   } else {
@@ -210,9 +220,9 @@ app.get('/urls', (req, res) => {
 
 
 app.get('/urls/new', (req, res) => {
-  const loginStatus = checkLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.session.user_id);
   if(loginStatus){
-    let templateVars = {user: users[req.cookies.user_id],
+    let templateVars = {user: users[req.session.user_id],
       loginStatus: loginStatus};
     res.render('urls_new', templateVars);
   } else {
@@ -222,7 +232,7 @@ app.get('/urls/new', (req, res) => {
 
 
 app.post('/urls', (req, res) => {
-  const loginStatus = checkLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.session.user_id);
   //check log in and duplicates
   if(loginStatus){
     let newLongURL = req.body.longURL;
@@ -232,7 +242,7 @@ app.post('/urls', (req, res) => {
       shortURL = generateRandomString();
       urlDatabase[shortURL] = {};
       urlDatabase[shortURL].longURL = newLongURL;
-      urlDatabase[shortURL].userID = req.cookies.user_id;
+      urlDatabase[shortURL].userID = req.session.user_id;
     } else {
       shortURL = duplicateStatus;
     }
@@ -245,16 +255,16 @@ app.post('/urls', (req, res) => {
 
 
 app.post('/urls/:id/delete', (req, res) => {
-  const loginStatus = checkLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.session.user_id);
   //check login and if the user is the creator
   if(loginStatus){
     let shortURL = req.params.id;
-    if(req.cookies.user_id === urlDatabase[shortURL].userID) {
+    if(req.session.user_id === urlDatabase[shortURL].userID) {
       delete urlDatabase[shortURL];
       res.redirect('/urls');
     } else{
       //logged in but not the creator
-      let userOwned = urlsForUsers(req.cookies.user_id);
+      let userOwned = urlsForUsers(req.session.user_id);
       let templateVars = {loginStatus: loginStatus,
         shortURL: req.params.id,
         urlDatabase: userOwned};
@@ -269,12 +279,12 @@ app.post('/urls/:id/delete', (req, res) => {
 
 
 app.get('/urls/:id', (req, res) => {
-  const loginStatus = checkLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.session.user_id);
   if(loginStatus){
-    let userOwned = urlsForUsers(req.cookies.user_id);
+    let userOwned = urlsForUsers(req.session.user_id);
     let templateVars = {shortURL: req.params.id,
       urlDatabase: userOwned,
-      user: users[req.cookies.user_id],
+      user: users[req.session.user_id],
       loginStatus: loginStatus};
     res.render('urls_show', templateVars);
   } else {
@@ -285,13 +295,13 @@ app.get('/urls/:id', (req, res) => {
 
 
 app.post('/urls/:id', (req, res) => {
-  const loginStatus = checkLogin(req.cookies.user_id);
+  const loginStatus = checkLogin(req.session.user_id);
   if(loginStatus){
     //check login and if the user is the creator
     let newLongURL = req.body.newLongUrl;
     let shortURL = req.params.id;
     //log in, as well as the creator
-    if(req.cookies.user_id === urlDatabase[shortURL].userID) {
+    if(req.session.user_id === urlDatabase[shortURL].userID) {
       let duplicateStatus = urlDuplicats(newLongURL);
       //check if the new url existing already
       if (!duplicateStatus){
@@ -302,7 +312,7 @@ app.post('/urls/:id', (req, res) => {
       }
       //log in, but not the creator
     } else{
-      let userOwned = urlsForUsers(req.cookies.user_id);
+      let userOwned = urlsForUsers(req.session.user_id);
       let templateVars = {loginStatus: loginStatus,
         shortURL: req.params.id,
         urlDatabase: userOwned};
@@ -310,8 +320,8 @@ app.post('/urls/:id', (req, res) => {
     }
     // not log in
   } else {
-    let templateVars = {loginStatus: loginStatus};
-    res.render(`/urls/ ${req.params.id}`, templateVars);
+    //let templateVars = {loginStatus: loginStatus};
+    res.redirect(`/urls/${req.params.id}`);
   }
 });
 
