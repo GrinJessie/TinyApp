@@ -114,11 +114,6 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('/hello', (req, res) => {
-  res.end('<html><body>Hello <b>World</b></body></html>\n');
-});
-
-
 app.get('/register', (req, res) => {
   const loginStatus = checkLogin(req.session.user_id);
   if(!loginStatus){
@@ -133,15 +128,15 @@ app.get('/register', (req, res) => {
 
 
 app.post('/register', (req, res) => {
-  //data validation
+//data validation
   if(!validRegistration(req)) {
     res.status(400);
     res.render('registration', {validRegistrationStatus: false});
-  //registration history
+//registration history
   }else if (registerHistory(users, req.body.email)) {
     res.status(400);
     res.render('registration', {validRegistrationStatus: true, registerHistoryStatus: true});
-  //set up new registration
+//set up new registration
   } else {
     let userId = generateRandomString();
     users[userId] = {};

@@ -2,7 +2,7 @@
 <% include partials/_header.ejs%>
 
 
-  <h1>We offer URL shortners!</h1>
+<h1>We offer URL shortners!</h1>
 
 <% if (!loginStatus) { %>
   <h3>Error: log in to continue.</h3>
@@ -13,22 +13,22 @@
 <% } %>
 
 
-  <ul>
-    <% for (let shortURL in urlDatabase) { %>
-    <li style="margin: 20px;">
+<ul>
+  <% for (let shortURL in urlDatabase) { %>
+  <li style="margin: 20px;">
 
 
-      <%= shortURL %>  ➡ <a href="<%= urlDatabase[shortURL].longURL%>"><%= urlDatabase[shortURL].longURL %></a>
+    <%= shortURL %>  ➡ <a href="<%= urlDatabase[shortURL].longURL%>"><%= urlDatabase[shortURL].longURL %></a>
 
-        <a href="/urls/<%= shortURL %>"><button style="background: none; border: none; text-decoration: underline;">Edit</button></a>
+      <a href="/urls/<%= shortURL %>"><button style="background: none; border: none; text-decoration: underline;">Edit</button></a>
 
-      <form action="/urls/<%= shortURL %>/delete" method="POST" style="display: inline-block">
-        <button style="background: none; border: 1px solid grey; border-radius: 100px;">Delete🗑️</button>
-      </form>
-    </li>
-    <% } %>
+    <form action="/urls/<%= shortURL %>/delete" method="POST" style="display: inline-block">
+      <button style="background: none; border: 1px solid grey; border-radius: 100px;">Delete🗑️</button>
+    </form>
+  </li>
+  <% } %>
 
-  </ul>
+</ul>
 
 <a href="/urls/new">Click to shorten a new url</a>
 
