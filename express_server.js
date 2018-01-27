@@ -96,11 +96,7 @@ const validRegistration = function(req){
 //if not matched, key = undefined
 //if matched, key = user's user_id
 const loginMatch = function (users, req){
-  console.log(req.body);
-
   for (let key in users) {
-      console.log(bcrypt.compareSync(req.body.password, users[key].password));
-
     if (req.body.email === users[key].email && bcrypt.compareSync(req.body.password, users[key].password)) {
       return key;
     }
@@ -174,9 +170,6 @@ app.get('/login', (req, res) => {
 
 
 app.post('/login', (req, res) => {
-  console.log('/login');
-    console.log(req.body);
-
   //if not matched, key = undefined
   //if matched, key = user's user_id
   let key = loginMatch(users, req);
