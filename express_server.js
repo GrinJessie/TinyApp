@@ -19,8 +19,8 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
-  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: 'userRandomID'},
-  "9sm5xK": {longURL: "http://www.google.com", userID: 'user2RandomID'}
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: 'userRandomID', visit: 0},
+  "9sm5xK": {longURL: "http://www.google.com", userID: 'user2RandomID', visit: 0}
 };
 
 const users = {
@@ -105,6 +105,7 @@ const loginMatch = function (users, req){
     }
   }
 };
+
 
 
 app.get('/', (req, res) => {
@@ -234,6 +235,7 @@ app.post('/urls', (req, res) => {
       urlDatabase[shortURL] = {};
       urlDatabase[shortURL].longURL = newLongURL;
       urlDatabase[shortURL].userID = req.session.user_id;
+      urlDatabase[shortURL].visit = 0;
     } else {
       shortURL = duplicateStatus;
     }
@@ -320,6 +322,8 @@ app.put('/urls/:id', (req, res) => {
 app.get('/u/:shortURL', (req, res) => {
   let shortURL = req.params.shortURL;
   let longURL = urlDatabase[shortURL].longURL;
+  urlDatabase[shortURL].visit += 1;
+  console.log(urlDatabase);
   if (longURL) {
     res.redirect(longURL);
   } else {
