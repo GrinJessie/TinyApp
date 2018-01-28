@@ -19,8 +19,18 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
-  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: 'userRandomID', visit: 0},
-  "9sm5xK": {longURL: "http://www.google.com", userID: 'user2RandomID', visit: 0}
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: 'userRandomID',
+    visit: 0,
+    visitBy:[]
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: 'user2RandomID',
+    visit: 0,
+    visitBy:[]
+  }
 };
 
 const users = {
@@ -323,7 +333,16 @@ app.get('/u/:shortURL', (req, res) => {
   let shortURL = req.params.shortURL;
   let longURL = urlDatabase[shortURL].longURL;
   urlDatabase[shortURL].visit += 1;
-  console.log(urlDatabase);
+//if no cookie, send cookie, push visitor_id
+  if (!req.session.visitor_id) {
+    req.session.visitor_id = generateRandomString();
+  }
+  let vistorInfo = {
+      visitor_id: req.session.visitor_id,
+      timestamp: req
+    }
+  urlDatabase[shortURL].visitBy.push(vistorInfo);
+  console.log(req.headers);
   if (longURL) {
     res.redirect(longURL);
   } else {

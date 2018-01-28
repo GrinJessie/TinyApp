@@ -17,6 +17,18 @@
 <br>
 <br>
    <h4 style="margin-left: 30px;">Number of vists: <b><%= urlDatabase[shortURL].visit %></b></h4>
+   <h4 style="margin-left: 30px;">List of unique visitors(visitor id):</h4>
+    <% urlDatabase[shortURL].visitBy.forEach(function(id){ %>
+    <ul style="margin-left: 30px;">
+    <li><%=id.visitor_id %></li>
+    </ul>
+  <% }); %>
+     <h4 style="margin-left: 30px;">List of visiting history(visitor id & timestamp):</h4>
+  <% urlDatabase[shortURL].visitBy.forEach(function(id){ %>
+    <ul style="margin-left: 30px;">
+    <li><%=id.visitor_id %> - <%=id.timestamp%></li>
+    </ul>
+  <% }); %>
 
 <% } else {%>
   <h3><%= shortURL %> is not accessible/editable for you (only to its creator...) <br>OR it hasn't been created yet (Start now!)</h3>
