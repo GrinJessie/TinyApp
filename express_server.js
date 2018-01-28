@@ -1,5 +1,6 @@
 const express = require('express');
 const cookieSession = require('cookie-session');
+const methodOverride = require('method-override');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -10,6 +11,8 @@ app.use(cookieSession({
   name: 'session',
   keys: ['mySecretKey']
 }));
+
+app.use(methodOverride('_method'));
 
 app.set('view engine', 'ejs');
 
@@ -242,7 +245,7 @@ app.post('/urls', (req, res) => {
 });
 
 
-app.post('/urls/:id/delete', (req, res) => {
+app.delete('/urls/:id/delete', (req, res) => {
   const loginStatus = checkLogin(req.session.user_id);
   //check login and if the user is the creator
   if(loginStatus){
@@ -282,7 +285,7 @@ app.get('/urls/:id', (req, res) => {
 });
 
 
-app.post('/urls/:id', (req, res) => {
+app.put('/urls/:id', (req, res) => {
   const loginStatus = checkLogin(req.session.user_id);
   if(loginStatus){
     //check login and if the user is the creator

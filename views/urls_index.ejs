@@ -22,7 +22,7 @@
 
       <a href="/urls/<%= shortURL %>"><button style="background: none; border: none; text-decoration: underline;">Edit</button></a>
 
-    <form action="/urls/<%= shortURL %>/delete" method="POST" style="display: inline-block">
+    <form action="/urls/<%= shortURL %>/delete?_method=DELETE" method="POST" style="display: inline-block">
       <button style="background: none; border: 1px solid grey; border-radius: 100px;">Delete🗑️</button>
     </form>
   </li>
